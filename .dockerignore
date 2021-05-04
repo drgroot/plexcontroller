@@ -1,0 +1,17 @@
+# other
+.dockerignore
+.eslintrc.json
+.eslintignore
+Dockerfile
+README.md
+
+# git and os
+.DS_Store
+.git
+.gitignore
+.github
+
+# javascript files
+dist
+node_modules
+test

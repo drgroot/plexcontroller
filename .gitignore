@@ -1,0 +1,6 @@
+*.swp
+node_modules
+.vscode
+.DS_Store
+.nyc_output
+dist
