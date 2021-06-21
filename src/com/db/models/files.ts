@@ -99,15 +99,34 @@ File.init(
   },
 );
 
-export const getRecentFiles = (now = new Date()) => File.findAll({
-  attributes: ['path'],
-  where: {
-    // @ts-ignore
+export const getRecentFiles = (now = new Date()) => {
+  let referenceDays = 1;
+
+  // if we are the beginning of the week, examine the full week of data
+  if (now.getUTCDay() === 1) {
+    referenceDays = 7;
+  }
+
+  const where = (now.getUTCDate() === 1) ? {} : {
     updatedAt: {
       [Op.between]: [
-        new Date(now.getFullYear(), now.getMonth() - 1, now.getDate() - 2, 0, 0, 0, 0),
+        new Date(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - referenceDays,
+          0,
+          0,
+          0,
+          0,
+        ),
         now,
       ],
     },
-  },
-});
+  };
+
+  return File.findAll({
+    attributes: ['path'],
+    // @ts-ignore
+    where,
+  });
+};

@@ -1,3 +1,4 @@
+import axios from 'axios';
 // @ts-ignore
 import PlexAPI from 'plex-api';
 import {
@@ -12,6 +13,7 @@ import Library from './library';
 import PlexWebSocket from './ws';
 import PlayBack from './playback';
 import User, { getToken } from './user';
+import { critical, debug } from '../../com/log';
 
 type IPADDRESS = string;
 
@@ -108,5 +110,21 @@ export default class Plex {
     }
 
     return new Plex(serverConnections[serverConnectionName]);
+  }
+
+  performGet(rpath: string, parameters: { [key: string]: string } = {}): Promise<boolean> {
+    axios.defaults.baseURL = `http://${this.server.serverUrl}`;
+    debug('get', 'sending', parameters, 'to url', rpath);
+    return axios.get(
+      rpath,
+      {
+        params: {
+          ...parameters,
+          'X-Plex-Token': this.server.authToken,
+        },
+      },
+    )
+      .then(() => true)
+      .catch((err) => critical(err));
   }
 }

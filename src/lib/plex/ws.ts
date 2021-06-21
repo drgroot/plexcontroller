@@ -12,6 +12,8 @@ const PLEXPACKETS: PACKETTYPE = {
   ACTIVITY: 'activity',
   PREFERENCE: 'preference',
 
+  ACCOUNT: 'account',
+
   TRANSCODE_UPDATE: 'transcodeSession.update',
   TRANSCODE_END: 'transcodeSession.end',
   TRANSCODE_START: 'transcodeSession.start',

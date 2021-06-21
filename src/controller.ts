@@ -1,7 +1,5 @@
-/* eslint-disable no-await-in-loop, func-names */
-import { CronJob } from 'cron';
+/* eslint-disable no-await-in-loop */
 import { debug } from './com/log';
-import { MONTHLY_CRON, CRON_TIMEZONE } from './com/config';
 import send from './lib/message';
 import Plex, { HOSTNAMES } from './lib/plex';
 import { LibraryCommands } from './lib/plex/library';
@@ -14,18 +12,6 @@ export default class Controller {
 
     this.onConsuming = this.onConsuming.bind(this);
     this.onMessage = this.onMessage.bind(this);
-
-    if (MONTHLY_CRON) {
-      const job = new CronJob(
-        MONTHLY_CRON,
-        // @ts-ignore
-        function () { this.scanFullLibrary(); },
-        null,
-        true,
-        CRON_TIMEZONE,
-      );
-      job.start();
-    }
   }
 
   // eslint-disable-next-line class-methods-use-this

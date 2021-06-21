@@ -18,7 +18,8 @@
   "types": [
     "amqplib",
     "cron",
-    "ws"
+    "ws",
+    "axios"
   ],
   "include": [
     "src/**/*.ts",

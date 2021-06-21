@@ -6,7 +6,7 @@ export const getSharedServers = (machineId: string) => `/api/servers/${machineId
 
 export const getLibraries = () => '/library/sections';
 export const getLibraryItems = (libraryKey: string) => `/library/sections/${libraryKey}/all`;
-export const scanLibrary = (libraryKey: string) => `/library/sections/${libraryKey}/refresh`;
+export const scanLibrary = (libraryKey: string) => `library/sections/${libraryKey}/refresh`;
 export const scanLibraryPath = (libraryKey: string, path: string) => `${scanLibrary(libraryKey)}?path=${path}`;
 
 export const getSessionById = (sessionId: string) => `/status/sessions?sessionKey=${sessionId}`;

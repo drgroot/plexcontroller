@@ -155,7 +155,7 @@ export default class Library extends Component {
 
     // scan whole library
     if (!rpath) {
-      await this.PlexInstance.server.perform(scanLibrary(library.key));
+      await this.PlexInstance.performGet(scanLibrary(library.key));
       return true;
     }
 
@@ -181,7 +181,7 @@ export default class Library extends Component {
 
     // construct folder to scan
     const scanPath: string[] = [];
-    for (const item of [...libraryRootPath?.split('/'), ...splitFolders]) {
+    for (const item of [...libraryRootPath.split('/'), ...splitFolders]) {
       if (!scanPath.includes(item) && item) {
         scanPath.push(item);
       }
@@ -190,7 +190,12 @@ export default class Library extends Component {
     // perform scan
     const scanpathFinal = `/${scanPath.join('/')}`;
     debug('scan', 'scanning', scanLibraryPath(library.key, scanpathFinal));
-    await this.PlexInstance.server.perform(scanLibraryPath(library.key, scanpathFinal));
+    await this.PlexInstance.performGet(
+      scanLibrary(library.key),
+      {
+        path: scanpathFinal,
+      },
+    );
     return true;
   }
 
@@ -203,6 +208,10 @@ export default class Library extends Component {
 
     if (command === LibraryCommands.SCAN_PATH && values.length === 2) {
       return this.scan(`${values[0]}`, `${values[1]}`);
+    }
+
+    if (command === LibraryCommands.SCAN_LIBRARY && values.length === 1) {
+      return this.scan(`${values[0]}`);
     }
 
     return false;
