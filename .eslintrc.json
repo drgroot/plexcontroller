@@ -9,5 +9,11 @@
   ],
   "parserOptions": {
     "project": "./tsconfig.testing.json"
+  },
+  "rules": {
+    "no-restricted-syntax": [
+      2,
+      "BinaryExpression[operator='in']"
+    ]
   }
 }
