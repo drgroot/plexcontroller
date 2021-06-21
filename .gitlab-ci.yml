@@ -61,6 +61,8 @@ build:
 deploy image:
   stage: deploy
   image: yusufali/terraform:0.13.4
+  only:
+    - master
   variables:
     DOCKER_DRIVER: overlay2
     GIT_SUBMODULE_STRATEGY: recursive
