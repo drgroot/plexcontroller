@@ -100,7 +100,7 @@ File.init(
 );
 
 export const getRecentFiles = (now = new Date()) => {
-  let referenceDays = 1;
+  let referenceDays = 3;
 
   // if we are the beginning of the week, examine the full week of data
   if (now.getUTCDay() === 1) {
