@@ -99,9 +99,11 @@ export default class Websocket extends EventEmitter {
 
   onError(err: Error) {
     this.emit('error', err, this.id);
+    critical('websocket error', err.message);
     if (this.ws) {
       this.ws.terminate();
     }
+    process.exit();
   }
 
   onClose(code: number, reason: string) {

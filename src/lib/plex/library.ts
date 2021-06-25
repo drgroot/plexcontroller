@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import path from 'path';
 import { critical, debug, warn } from '../../com/log';
+import { sleep } from '../lib';
 import type { Message } from '../message';
 import type Plex from '.';
 import Component from './component';
@@ -196,6 +197,7 @@ export default class Library extends Component {
         path: scanpathFinal,
       },
     );
+    await sleep(5);
     return true;
   }
 
