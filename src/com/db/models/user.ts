@@ -128,7 +128,7 @@ export const getPlaybacks = (now = new Date()) => User.findAll({
     where: {
       updatedAt: {
         [Op.between]: [
-          new Date(now.getFullYear(), now.getMonth() - 1, now.getDate() - 2, 0, 0, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate() - 4, 0, 0, 0, 0),
           now,
         ],
       },
