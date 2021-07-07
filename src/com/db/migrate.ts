@@ -44,6 +44,10 @@ const migrate = async (tasks: MigrationType[] | false = false): Promise<number> 
 
     // handle where there is no version
     const latestVersion = Migrations.sort((a, b) => a.version - b.version);
+    const firstVersion = Migrations.find((a) => a.version === 0);
+    if (firstVersion) {
+      await firstVersion.run();
+    }
     await Migration.create({ service, version: latestVersion[latestVersion.length - 1].version });
     return migrate(false);
   }

@@ -6,6 +6,7 @@ import {
   PLEXUSERNAME as username,
   KUBERNETES_IP,
   STARTUP_DELAY,
+  PLEXLOCAL_IP,
 } from '../../com/config';
 import { servers } from './endpoints';
 import { sleep } from '../lib';
@@ -22,7 +23,7 @@ type HOSTNAMELOOKUP = {
 };
 
 export const HOSTNAMES: HOSTNAMELOOKUP = {
-  LOCAL: '127.0.0.1',
+  LOCAL: PLEXLOCAL_IP,
   PLEX: 'plex.tv',
   KUBERNETES: KUBERNETES_IP || 'elrond.yusufali.ca:32400',
 };

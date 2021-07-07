@@ -11,6 +11,7 @@ export const {
   OPERATION_MODE = 'sidecar',
 
   KUBERNETES_IP,
+  PLEXLOCAL_IP = '127.0.0.1',
   MONTHLY_CRON,
   DAILY_CRON,
   CRON_TIMEZONE,
