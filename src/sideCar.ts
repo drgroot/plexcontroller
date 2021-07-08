@@ -1,7 +1,9 @@
 /* eslint-disable no-await-in-loop */
 import Path from 'path';
 import { CronJob } from 'cron';
-import { queueName, DAILY_CRON, CRON_TIMEZONE } from './com/config';
+import {
+  queueName, DAILY_CRON, CRON_TIMEZONE, SCAN_LIMIT,
+} from './com/config';
 import { critical, debug } from './com/log';
 import { getRecentFiles } from './com/db/models/files';
 import type { QueueMessage } from './lib/message';
@@ -22,14 +24,27 @@ export default class SideCar {
 
     if (DAILY_CRON) {
       const sideCar = this;
-      const job = new CronJob(
+
+      // scan new files
+      const jobScan = new CronJob(
         DAILY_CRON,
         () => sideCar.scanRecent(),
         null,
         true,
         CRON_TIMEZONE,
       );
-      job.start();
+      jobScan.start();
+
+      // apply database playback
+      const jobPlayback = new CronJob(
+        DAILY_CRON,
+        () => sideCar.server
+          .then((plexServer) => plexServer.playback.applyDatabasePlaybacks()),
+        null,
+        true,
+        CRON_TIMEZONE,
+      );
+      jobPlayback.start();
     }
   }
 
@@ -87,8 +102,8 @@ export default class SideCar {
       debug('sidecar', 'checking for path', path);
       const relativePath = Path.dirname(path);
 
-      // scan at most 5 paths
-      if (!sentPaths.has(relativePath) && sentPaths.size < 5) {
+      // scan at most n paths
+      if (!sentPaths.has(relativePath) && sentPaths.size < SCAN_LIMIT) {
         const [hasItem, libraryTitle] = await server.library.hasItem(path);
 
         if (!hasItem && libraryTitle) {

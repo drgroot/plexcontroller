@@ -9,6 +9,7 @@ export const {
   PLEXPASSWORD,
   STARTUP_DELAY = '0',
   OPERATION_MODE = 'sidecar',
+  SCAN_LIMIT = 10,
 
   KUBERNETES_IP,
   PLEXLOCAL_IP = '127.0.0.1',
