@@ -77,9 +77,11 @@ export default class Plex {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async syncPlayBack(email: string, libraryTitle: string, title: string, time: number) {
+  async syncPlayBack(
+    email: string, libraryTitle: string, title: string, time: number, ratingKey: string,
+  ) {
     const userServer = await Plex.build(HOSTNAMES.LOCAL, email);
-    return userServer.playback.sync(libraryTitle, title, time);
+    return userServer.playback.sync(libraryTitle, title, time, ratingKey);
   }
 
   static async build(host: IPADDRESS, useremail?: string): Promise<Plex> {

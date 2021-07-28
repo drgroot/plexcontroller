@@ -99,17 +99,29 @@ export const newUser = (name: string, email: string): Promise<User | null> => ge
   );
 
 export const setPlayback = async (
-  email: string, libraryTitle: string, title: string, time: number,
+  email: string,
+  libraryTitle: string,
+  title: string,
+  time: number,
+  ratingKey: string,
 ): Promise<boolean> => {
   const user = await getUserByEmail(email);
   if (!user) return false;
 
   const allPlaybacks = await user.getUserPlaybacks();
-  const playback = allPlaybacks.find((f) => f.libraryTitle === libraryTitle && f.title === title);
+  const playback = allPlaybacks
+    .find((f) => f.libraryTitle === libraryTitle && f.ratingKey === ratingKey);
 
   if (!playback) {
-    await user.createUserPlayback({ libraryTitle, title, time });
+    await user.createUserPlayback({
+      libraryTitle, title, time, ratingKey,
+    });
     return true;
+  }
+
+  if (playback.title !== title) {
+    playback.title = title;
+    await playback.save({ fields: ['title'] });
   }
 
   if (playback.time !== time) {

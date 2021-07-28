@@ -6,6 +6,7 @@ interface UserPlaybackAttributes {
   UserId: number,
   libraryTitle: string,
   title: string,
+  ratingKey: string,
   time: number,
 }
 
@@ -21,6 +22,8 @@ export default class UserPlayback
   public libraryTitle!: string;
 
   public title!: string;
+
+  public ratingKey!: string;
 
   public time!: number;
 
@@ -52,13 +55,17 @@ UserPlayback.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    ratingKey: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     sequelize,
     indexes: [
       {
         unique: true,
-        fields: ['UserId', 'libraryTitle', 'title'],
+        fields: ['UserId', 'libraryTitle', 'ratingKey'],
       },
     ],
   },

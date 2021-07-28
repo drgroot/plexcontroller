@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import {
   critical, error, debug, info,
 } from '../../com/log';
@@ -14,6 +13,7 @@ import { getSessionById, setPlayback as setPlexPlayback } from './endpoints';
 
 interface Session {
   title: string
+  ratingKey: string,
   librarySectionTitle: string
   duration: string
   viewOffset: string,
@@ -21,9 +21,11 @@ interface Session {
 }
 
 export default class PlayBack extends Component {
-  async sync(libraryTitle: string, title: string, time: number) {
-    debug('playback', 'syncing item', { libraryTitle, title, time });
-    const item = await this.PlexInstance.library.getMediaItem(libraryTitle, title);
+  async sync(libraryTitle: string, title: string, time: number, ratingKey: string) {
+    debug('playback', 'syncing item', {
+      libraryTitle, title, time, ratingKey,
+    });
+    const item = await this.PlexInstance.library.getMediaItem(libraryTitle, title, ratingKey);
 
     if (item) {
       await this.PlexInstance.server.query(
@@ -63,13 +65,15 @@ export default class PlayBack extends Component {
       return;
     }
 
-    const updated = await setPlayback(User.email, Session.librarySectionTitle, Session.title, time);
+    const updated = await setPlayback(
+      User.email, Session.librarySectionTitle, Session.title, time, Session.ratingKey,
+    );
     if (updated) {
       await send(
         'playback',
         {
           command: 'sync',
-          values: [User.email, Session.librarySectionTitle, Session.title, time],
+          values: [User.email, Session.librarySectionTitle, Session.title, time, Session.ratingKey],
         },
       );
     }
@@ -77,18 +81,22 @@ export default class PlayBack extends Component {
 
   async applyDatabasePlaybacks() {
     const Users = await getPlaybacks();
+    const jobs = [];
     for (const user of Users) {
       if (user.UserPlaybacks) {
         for (const playback of user.UserPlaybacks) {
-          await this.PlexInstance.syncPlayBack(
+          jobs.push(this.PlexInstance.syncPlayBack(
             user.email,
             playback.libraryTitle,
             playback.title,
             playback.time,
-          );
+            playback.ratingKey,
+          ));
         }
       }
     }
+
+    return Promise.all(jobs);
   }
 
   async websocketHandle(data: any) {

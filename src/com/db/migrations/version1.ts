@@ -27,6 +27,7 @@ const run = () => sequelize.query(
           () => Promise.all([
             rawPlaybacks
               .map(
+                // @ts-ignore
                 (p) => setPlayback(
                   p.email,
                   p.libraryTitle,

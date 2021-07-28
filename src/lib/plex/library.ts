@@ -6,7 +6,7 @@ import type { Message } from '../message';
 import type Plex from '.';
 import Component from './component';
 import {
-  getLibraries, getLibraryItems, scanLibrary, scanLibraryPath,
+  getItemByKey, getLibraries, getLibraryItems, scanLibrary, scanLibraryPath,
 } from './endpoints';
 
 export const LibraryCommands: { [key: string]: string } = {
@@ -19,6 +19,7 @@ interface LibraryItem {
   key: string,
   Media?: { Part: { file: string }[] }[]
   title: string
+  librarySectionTitle: string,
   duration: number,
 }
 
@@ -71,8 +72,22 @@ export default class Library extends Component {
       .find(({ title }) => title === libraryTitle) || null;
   }
 
-  async getMediaItem(libraryTitle: string, mediaTitle: string): Promise<LibraryItem | null> {
-    debug('lib/library.js', 'finding media item', { mediaTitle, libraryTitle });
+  async getMediaItem(
+    libraryTitle: string, mediaTitle: string, ratingKey: string | null = null,
+  ): Promise<LibraryItem | null> {
+    debug('lib/library.js', 'finding media item', { mediaTitle, libraryTitle, ratingKey });
+
+    if (ratingKey) {
+      const response = await this.PlexInstance.server.query(getItemByKey(ratingKey));
+      if (response?.MediaContainer?.size) {
+        const Items: LibraryItem[] = response.MediaContainer.Metadata;
+        const item = Items
+          .find((i) => i.title === mediaTitle && i.librarySectionTitle === libraryTitle);
+        if (item) {
+          return item;
+        }
+      }
+    }
 
     // find the library
     const library = await this.getByTitle(libraryTitle);

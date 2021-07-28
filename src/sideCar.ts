@@ -57,6 +57,7 @@ export default class SideCar {
           `${message.values[1]}`,
           `${message.values[2]}`,
           (typeof message.values[3] !== 'string') ? message.values[3] : parseInt(message.values[3], 10),
+          `${message.values[4]}`,
         );
       }
     }
