@@ -1,39 +1,23 @@
 /* eslint-disable no-await-in-loop */
-import Path from 'path';
 import { CronJob } from 'cron';
 import {
-  queueName, DAILY_CRON, CRON_TIMEZONE, SCAN_LIMIT,
+  queueName, DAILY_CRON, CRON_TIMEZONE,
 } from './com/config';
 import { critical, debug } from './com/log';
-import { getRecentFiles } from './com/db/models/files';
 import type { QueueMessage } from './lib/message';
-import { toMe, sendToMe } from './lib/message';
+import { toMe } from './lib/message';
 import Plex, { HOSTNAMES } from './lib/plex';
-import { LibraryCommands } from './lib/plex/library';
 
 export default class SideCar {
   private server: Promise<Plex>;
 
-  private scanning: boolean;
-
   constructor() {
     this.server = Plex.build(HOSTNAMES.LOCAL);
-    this.scanning = false;
     this.onConsuming = this.onConsuming.bind(this);
     this.onMessage = this.onMessage.bind(this);
 
     if (DAILY_CRON) {
       const sideCar = this;
-
-      // scan new files
-      const jobScan = new CronJob(
-        DAILY_CRON,
-        () => sideCar.scanRecent(),
-        null,
-        true,
-        CRON_TIMEZONE,
-      );
-      jobScan.start();
 
       // apply database playback
       const jobPlayback = new CronJob(
@@ -83,43 +67,5 @@ export default class SideCar {
 
     critical('cannot handle message:', message);
     return false;
-  }
-
-  async scanRecent() {
-    if (this.scanning) {
-      debug('sidecar', 'service is already scanning..., skip');
-      return;
-    }
-
-    debug('sidecar', 'starting to check library presence of files');
-    const server = await this.server;
-    const newFiles = await getRecentFiles();
-
-    debug('sidecar', 'daily scan', 'checking', newFiles.length, 'files');
-    this.scanning = true;
-    const sentPaths = new Set();
-    for (const { path } of newFiles) {
-      debug('sidecar', 'checking for path', path);
-      const relativePath = Path.dirname(path);
-
-      // scan at most n paths
-      if (!sentPaths.has(relativePath) && sentPaths.size < SCAN_LIMIT) {
-        const [hasItem, libraryTitle] = await server.library.hasItem(path);
-
-        if (!hasItem && libraryTitle) {
-          debug('sidecar', 'daily scan', 'sending scan command for ', { relativePath, libraryTitle });
-          await sendToMe(
-            'library',
-            {
-              command: LibraryCommands.SCAN_PATH,
-              values: [libraryTitle, relativePath],
-            },
-          );
-          await server.library.scan(libraryTitle, relativePath);
-          sentPaths.add(relativePath);
-        }
-      }
-    }
-    this.scanning = false;
   }
 }
