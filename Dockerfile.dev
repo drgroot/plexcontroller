@@ -2,7 +2,8 @@ FROM node:lts-alpine
 
 WORKDIR /app
 COPY src src
-COPY .babelrc .
+COPY tsconfig.json .
+COPY nodemon.json .
 COPY package.json .
 COPY package-lock.json .
 
@@ -12,4 +13,4 @@ RUN npm install && npm install -g nodemon
 
 ENV NODE_ENV development
 USER node
-CMD ["nodemon","--exec","babel-node","/app/src/index.js"]
+CMD ["nodemon"]
