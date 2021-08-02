@@ -31,7 +31,7 @@ export default class PlayBack extends Component {
       await this.PlexInstance.server.query(
         setPlexPlayback(
           item.ratingKey,
-          time,
+          (time <= item.duration) ? time : item.duration,
           item.duration,
         ),
       );
