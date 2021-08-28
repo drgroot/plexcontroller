@@ -10,7 +10,7 @@ before_script:
   - npm install
 
 test:
-  image: postgres:13
+  image: postgres:12
   variables:
     RABBITMQ_DEFAULT_USER: guest
     RABBITMQ_DEFAULT_PASS: guest
@@ -43,9 +43,9 @@ audit:
   script:
     - npm audit
 
-build:
-  stage: test
-  image: yusufali/terraform:0.13.4
+deploy image:
+  stage: deploy
+  image: yusufali/terraform
   variables:
     DOCKER_DRIVER: overlay2
     GIT_SUBMODULE_STRATEGY: recursive
@@ -53,30 +53,11 @@ build:
   services:
     - docker:19.03.0-dind
   before_script:
-    - echo "Building test image"
+    - if [ -n "$GITLAB_PASSWORD" ]; then docker login $CI_SERVER_HOST -u $GITLAB_USERNAME -p $GITLAB_PASSWORD; fi
   script:
     - export IMAGE="$CI_SERVER_HOST/$CI_PROJECT_PATH"
     - docker build --network host -t $IMAGE .
-
-deploy image:
-  stage: deploy
-  image: yusufali/terraform:0.13.4
-  only:
-    - master
-  variables:
-    DOCKER_DRIVER: overlay2
-    GIT_SUBMODULE_STRATEGY: recursive
-    DOCKER_TLS_CERTDIR: ""
-  services:
-    - docker:19.03.0-dind
-  before_script:
-    - docker login $CI_SERVER_HOST -u $GITLAB_USERNAME -p $GITLAB_PASSWORD
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  script:
-    - export IMAGE="$CI_SERVER_HOST/$CI_PROJECT_PATH"
-    - docker build --network host -t $IMAGE -t $DOCKER_USERNAME/$CI_PROJECT_NAME .
-    - docker push $IMAGE
-    - docker push $DOCKER_USERNAME/$CI_PROJECT_NAME
+    - if [ -n "$GITLAB_PASSWORD" ]; then docker push $IMAGE; fi
 
 deploy cluster:
   stage: trigger
@@ -86,4 +67,4 @@ deploy cluster:
   before_script:
     - echo "About to deploy to cluster"
   script:
-  - "curl -X POST -F token=$TOKEN -F ref=master https://$CI_SERVER_HOST/gitlab/api/v4/projects/25/trigger/pipeline"
+    - "curl -X POST -F token=$TOKEN -F ref=master https://$CI_SERVER_HOST/api/v4/projects/25/trigger/pipeline"

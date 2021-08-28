@@ -1,0 +1,31 @@
+image: registry.yusufali.ca/gitpod/nodepostgres
+
+tasks:
+  - name: restore database
+    before: setup_environment
+    init: |
+      source ~/.profile
+      pg_start
+      PGHOSTADDR=$MAIN_DB_HOST PGPASSWORD=$MAIN_DB_PASSWORD pg_dump --no-acl --no-owner --clean --host=$MAIN_DB_HOST --username=$MAIN_DB_USERNAME --port=$MAIN_DB_PORT $MAIN_DB_DATABASE | psql -U gitpod --dbname postgres
+    command: |
+      source ~/.profile
+      pg_start || true
+  - name: npm modules
+    init: |
+      npm install
+      git remote add template https://gitlab.yusufali.ca/elrond/templates/template.git
+      git fetch origin
+    command: source ~/.profile
+    openMode: split-right
+
+vscode:
+  extensions:
+    - dbaeumer.vscode-eslint
+
+ports:
+  - port: 5432
+    onOpen: ignore
+    visibility: private
+  - port: 3000
+    onOpen: ignore
+    visibility: public
