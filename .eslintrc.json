@@ -14,9 +14,6 @@
     "no-restricted-syntax": [
       2,
       "BinaryExpression[operator='in']"
-    ],
-    "no-await-in-loop": [
-      2
     ]
   }
 }
