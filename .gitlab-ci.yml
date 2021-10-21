@@ -42,6 +42,7 @@ audit:
   stage: test
   script:
     - npm audit
+  allow_failure: true
 
 deploy image:
   stage: deploy
@@ -53,11 +54,12 @@ deploy image:
   services:
     - docker:19.03.0-dind
   before_script:
-    - if [ -n "$GITLAB_PASSWORD" ]; then docker login $CI_SERVER_HOST -u $GITLAB_USERNAME -p $GITLAB_PASSWORD; fi
+    - if [ -n "$DOCKER_USERNAME" ]; then docker login $WRITE_REGISTRY_URL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD; fi
   script:
-    - export IMAGE="$CI_SERVER_HOST/$CI_PROJECT_PATH"
-    - docker build --network host -t $IMAGE .
-    - if [ -n "$GITLAB_PASSWORD" ]; then docker push $IMAGE; fi
+    - export IMAGE="$WRITE_REGISTRY_URL/$CI_PROJECT_PATH"
+    - export CACHED_IMAGE="$REGISTRY_URL/$CI_PROJECT_PATH"
+    - docker build --network host -t $IMAGE --cache-from $CACHED_IMAGE .
+    - if [ -n "$DOCKER_USERNAME" ]; then docker push $IMAGE; fi
 
 deploy cluster:
   stage: trigger
