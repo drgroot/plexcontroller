@@ -46,20 +46,14 @@ audit:
 
 deploy image:
   stage: deploy
-  image: yusufali/terraform
+  image: registry.yusufali.ca/containers/kaniko
   variables:
-    DOCKER_DRIVER: overlay2
     GIT_SUBMODULE_STRATEGY: recursive
-    DOCKER_TLS_CERTDIR: ""
-  services:
-    - docker:19.03.0-dind
   before_script:
-    - if [ -n "$DOCKER_USERNAME" ]; then docker login $WRITE_REGISTRY_URL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD; fi
+    - echo "Building $WRITE_REGISTRY_URL/$CI_PROJECT_PATH"
   script:
     - export IMAGE="$WRITE_REGISTRY_URL/$CI_PROJECT_PATH"
-    - export CACHED_IMAGE="$REGISTRY_URL/$CI_PROJECT_PATH"
-    - docker build --network host -t $IMAGE --cache-from $CACHED_IMAGE .
-    - if [ -n "$DOCKER_USERNAME" ]; then docker push $IMAGE; fi
+    - build
 
 deploy cluster:
   stage: trigger
