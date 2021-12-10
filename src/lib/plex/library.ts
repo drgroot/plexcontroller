@@ -78,8 +78,14 @@ export default class Library extends Component {
     debug('lib/library.js', 'finding media item', { mediaTitle, libraryTitle, ratingKey });
 
     if (ratingKey) {
-      const response = await this.PlexInstance.server.query(getItemByKey(ratingKey));
-      if (response?.MediaContainer?.size) {
+      let response: false | { MediaContainer: { size: number, Metadata: LibraryItem[] } } = false;
+      try {
+        response = await this.PlexInstance.server.query(getItemByKey(ratingKey));
+      } catch (e) {
+        // pass
+      }
+
+      if (response && response?.MediaContainer?.size) {
         const Items: LibraryItem[] = response.MediaContainer.Metadata;
         const item = Items
           .find((i) => i.title === mediaTitle && i.librarySectionTitle === libraryTitle);
