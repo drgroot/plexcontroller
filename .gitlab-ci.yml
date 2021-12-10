@@ -42,22 +42,18 @@ audit:
   stage: test
   script:
     - npm audit
+  allow_failure: true
 
 deploy image:
   stage: deploy
-  image: yusufali/terraform
+  image: registry.yusufali.ca/containers/kaniko
   variables:
-    DOCKER_DRIVER: overlay2
     GIT_SUBMODULE_STRATEGY: recursive
-    DOCKER_TLS_CERTDIR: ""
-  services:
-    - docker:19.03.0-dind
   before_script:
-    - if [ -n "$GITLAB_PASSWORD" ]; then docker login $CI_SERVER_HOST -u $GITLAB_USERNAME -p $GITLAB_PASSWORD; fi
+    - echo "Building $WRITE_REGISTRY_URL/$CI_PROJECT_PATH"
   script:
-    - export IMAGE="$CI_SERVER_HOST/$CI_PROJECT_PATH"
-    - docker build --network host -t $IMAGE .
-    - if [ -n "$GITLAB_PASSWORD" ]; then docker push $IMAGE; fi
+    - export IMAGE="$WRITE_REGISTRY_URL/$CI_PROJECT_PATH"
+    - build
 
 deploy cluster:
   stage: trigger
